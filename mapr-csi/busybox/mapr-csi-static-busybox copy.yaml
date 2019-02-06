@@ -1,0 +1,94 @@
+# MapR Kubernetes Container Storage Interface (CSI)
+
+# Using the Kubernetes CSI for static provisioning
+
+# Provisioning: static
+# Container:    busybox
+
+# Namespace
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mapr-csi-static-busybox
+  labels:
+    name: mapr-csi-static-busybox
+
+# Ticket to authenticate with MapR Converged Data Platform
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mapr-ticket-secret
+  namespace: mapr-csi-static-busybox
+type: Opaque
+# To create a Ticket:
+# 1. maprlogin password -user mapr
+# 2. echo -n $(cat /tmp/maprticket_####) | base64 -w 0
+data:
+  CONTAINER_TICKET: ZGVtby5tYXByLmNvbSBwNzc5VnNKN05xOWxmOU0vY3ZVbXJMek9WMHRlUWluaTZuRUFqZEpiU1BkaWZHVzlPRFFXQ1c5Z0R2NXFsTVlkOTZCQzhneWpTOWxwNGdrakkvL29QNStqRUNhNFlCeFRrb2RMcmdJaGZTeG1YOTBuRzJSRm9MSkJ1RFZKcDBObERYbkJEa3Q1OHAxRmpvKzNPKzMxb2lpZWtDMTYzb2VQc1ZXWm11Qm8zVEhjcmJaUmhJM2NVVmxVWC91b2xmL0lhOFBjM3o4TTgwV2FOM0RlOGJBVzUyeFdKSW9LZ1J1QWFzd1dFeWZVU3FpQ3lmQWgxMFI0Um9WUGVpMkIwZm5US2tyc3JqY3pIaXFnMWh5UE1SVm1QUzhaUUdTblU4OD0=
+
+# PersistentVolume for MapR Converged Data Platform
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mapr-csi-static-busybox-pv
+  namespace: mapr-csi-static-busybox
+spec:
+  accessModes:
+  - "ReadWriteMany"
+  persistentVolumeReclaimPolicy: "Retain"
+  capacity:
+    storage: 100M
+  csi:
+    nodePublishSecretRef:
+      name: "mapr-ticket-secret"
+      namespace: "mapr-csi-static-busybox"
+    driver: com.mapr.csi-kdf
+    volumeHandle: test-id
+    volumeAttributes:
+      volumePath: "/"
+      cldbHosts: "172.16.4.233"
+      cluster: "demo.mapr.com"
+      securityType: "secure"
+
+# PersistentVolumeClaim for MapR Converged Data Platform
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mapr-csi-static-busybox-pvc
+  namespace: mapr-csi-static-busybox-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 300M
+
+# Pod
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mapr-csi-static-busybox
+  namespace: mapr-csi-static-busybox
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    args:
+    - sleep
+    - "1000000"
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "500m"
+    volumeMounts:
+    - mountPath: /mapr
+      name: maprcsi
+  volumes:
+    - name: maprcsi
+      persistentVolumeClaim:
+        claimName: mapr-csi-static-busybox-pvc
