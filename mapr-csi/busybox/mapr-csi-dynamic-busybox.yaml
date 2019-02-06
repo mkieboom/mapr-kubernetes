@@ -1,3 +1,11 @@
+# MapR Kubernetes Container Storage Interface (CSI)
+
+# Using the Kubernetes CSI for dynamic provisioning
+
+# Provisioning: dynamic
+# Container:    busybox
+
+# Namespace
 ---
 apiVersion: v1
 kind: Namespace
@@ -6,19 +14,7 @@ metadata:
   labels:
     name: mapr-csi-dynamic-busybox
 
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mapr-ticket-secret
-  namespace: mapr-csi-dynamic-busybox
-type: Opaque
-# To create a Ticket:
-# 1. maprlogin password -user mapr
-# 2. echo -n $(cat /tmp/maprticket_####) | base64 -w 0
-data:
-  CONTAINER_TICKET: ZGVtby5tYXByLmNvbSBwNzc5VnNKN05xOWxmOU0vY3ZVbXJMek9WMHRlUWluaTZuRUFqZEpiU1BkaWZHVzlPRFFXQ1c5Z0R2NXFsTVlkOTZCQzhneWpTOWxwNGdrakkvL29QNStqRUNhNFlCeFRrb2RMcmdJaGZTeG1YOTBuRzJSRm9MSkJ1RFZKcDBObERYbkJEa3Q1OHAxRmpvKzNPKzMxb2lpZWtDMTYzb2VQc1ZXWm11Qm8zVEhjcmJaUmhJM2NVVmxVWC91b2xmL0lhOFBjM3o4TTgwV2FOM0RlOGJBVzUyeFdKSW9LZ1J1QWFzd1dFeWZVU3FpQ3lmQWgxMFI0Um9WUGVpMkIwZm5US2tyc3JqY3pIaXFnMWh5UE1SVm1QUzhaUUdTblU4OD0=
-
+# Secret to authenticate with MapR Converged Data Platform
 ---
 apiVersion: v1
 kind: Secret
@@ -32,6 +28,21 @@ data:
   MAPR_CLUSTER_USER: bWFwcg==
   MAPR_CLUSTER_PASSWORD: bWFwcg==
 
+# Ticket to authenticate with MapR Converged Data Platform
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mapr-ticket-secret
+  namespace: mapr-csi-dynamic-busybox
+type: Opaque
+# To create a Ticket:
+# 1. maprlogin password -user mapr
+# 2. echo -n $(cat /tmp/maprticket_####) | base64 -w 0
+data:
+  CONTAINER_TICKET: ZGVtby5tYXByLmNvbSBwNzc5VnNKN05xOWxmOU0vY3ZVbXJMek9WMHRlUWluaTZuRUFqZEpiU1BkaWZHVzlPRFFXQ1c5Z0R2NXFsTVlkOTZCQzhneWpTOWxwNGdrakkvL29QNStqRUNhNFlCeFRrb2RMcmdJaGZTeG1YOTBuRzJSRm9MSkJ1RFZKcDBObERYbkJEa3Q1OHAxRmpvKzNPKzMxb2lpZWtDMTYzb2VQc1ZXWm11Qm8zVEhjcmJaUmhJM2NVVmxVWC91b2xmL0lhOFBjM3o4TTgwV2FOM0RlOGJBVzUyeFdKSW9LZ1J1QWFzd1dFeWZVU3FpQ3lmQWgxMFI0Um9WUGVpMkIwZm5US2tyc3JqY3pIaXFnMWh5UE1SVm1QUzhaUUdTblU4OD0=
+
+# StorageClass for MapR Converged Data Platform
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -57,6 +68,7 @@ parameters:
     reclaimPolicy: "Retain"
     advisoryquota: "100M"
 
+# PersistentVolumeClaim for MapR Converged Data Platform
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
