@@ -38,7 +38,7 @@ metadata:
 spec:
   accessModes:
   - "ReadWriteMany"
-  persistentVolumeReclaimPolicy: "retain"
+  persistentVolumeReclaimPolicy: "Retain"
   capacity:
     storage: 100M
   csi:
