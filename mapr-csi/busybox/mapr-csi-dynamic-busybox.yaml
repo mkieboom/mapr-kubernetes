@@ -1,0 +1,97 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mapr-csi-dynamic-busybox
+  labels:
+    name: mapr-csi-dynamic-busybox
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mapr-ticket-secret
+  namespace: mapr-csi-dynamic-busybox
+type: Opaque
+# To create a Ticket:
+# 1. maprlogin password -user mapr
+# 2. echo -n $(cat /tmp/maprticket_####) | base64 -w 0
+data:
+  CONTAINER_TICKET: CHANGETHIS
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mapr-provisioner-secrets
+  namespace: mapr-csi-dynamic-busybox
+type: Opaque
+data:
+# base64 encoding: "echo -n '<username/password>' | base64" eg:
+# echo -n 'mapr' | base64
+  MAPR_CLUSTER_USER: bWFwcg==
+  MAPR_CLUSTER_PASSWORD: bWFwcg==
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mapr-csi-dynamic-busybox-sc
+  namespace: mapr-csi-dynamic-busybox
+provisioner: com.mapr.csi-kdf
+parameters:
+    csiProvisionerSecretName: "mapr-provisioner-secrets"
+    csiProvisionerSecretNamespace: "mapr-csi-dynamic-busybox"
+    csiNodePublishSecretName: "mapr-ticket-secret"
+    csiNodePublishSecretNamespace: "mapr-csi-dynamic-busybox"
+    restServers: "172.16.4.203:8443"
+    cldbHosts: "172.16.4.203"
+    cluster: "demo.mapr.com"
+    securityType: "secure"
+    ticketSecretName: "mapr-ticket-secret"
+    ticketSecretNamespace: "mapr-apps"
+    maprSecretName: "mapr-provisioner-secrets"
+    maprSecretNamespace: "mapr-apps"
+    namePrefix: "busybox-csi"
+    mountPrefix: "/busybox-csi"
+    reclaimPolicy: "Retain"
+    advisoryquota: "100M"
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mapr-csi-dynamic-busybox-pvc
+  namespace: mapr-csi-dynamic-busybox
+spec:
+  storageClassName: mapr-csi-dynamic-busybox-sc
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 300M
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mapr-csi-dynamic-busybox
+  namespace: mapr-csi-dynamic-busybox
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    args:
+    - sleep
+    - "1000000"
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "500m"
+    volumeMounts:
+    - mountPath: /dynamic
+      name: maprflex
+  volumes:
+    - name: maprflex
+      persistentVolumeClaim:
+        claimName: test-dynamic-pvc
