@@ -17,7 +17,7 @@ type: Opaque
 # 1. maprlogin password -user mapr
 # 2. echo -n $(cat /tmp/maprticket_####) | base64 -w 0
 data:
-  CONTAINER_TICKET: CHANGETHIS
+  CONTAINER_TICKET: ZGVtby5tYXByLmNvbSBwNzc5VnNKN05xOWxmOU0vY3ZVbXJMek9WMHRlUWluaTZuRUFqZEpiU1BkaWZHVzlPRFFXQ1c5Z0R2NXFsTVlkOTZCQzhneWpTOWxwNGdrakkvL29QNStqRUNhNFlCeFRrb2RMcmdJaGZTeG1YOTBuRzJSRm9MSkJ1RFZKcDBObERYbkJEa3Q1OHAxRmpvKzNPKzMxb2lpZWtDMTYzb2VQc1ZXWm11Qm8zVEhjcmJaUmhJM2NVVmxVWC91b2xmL0lhOFBjM3o4TTgwV2FOM0RlOGJBVzUyeFdKSW9LZ1J1QWFzd1dFeWZVU3FpQ3lmQWgxMFI0Um9WUGVpMkIwZm5US2tyc3JqY3pIaXFnMWh5UE1SVm1QUzhaUUdTblU4OD0=
 
 ---
 apiVersion: v1
@@ -89,9 +89,9 @@ spec:
         memory: "2Gi"
         cpu: "500m"
     volumeMounts:
-    - mountPath: /dynamic
-      name: maprflex
+    - mountPath: /mapr
+      name: maprcsi
   volumes:
-    - name: maprflex
+    - name: maprcsi
       persistentVolumeClaim:
-        claimName: test-dynamic-pvc
+        claimName: mapr-csi-dynamic-busybox-pvc
