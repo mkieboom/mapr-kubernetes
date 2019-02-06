@@ -1,0 +1,28 @@
+# MapR Kubernetes Container Storage Interface (CSI)
+
+# Create a snapshot
+
+---
+apiVersion: snapshot.storage.k8s.io/v1alpha1
+kind: VolumeSnapshotClass
+metadata:
+  name: mapr-csi-dynamic-busybox-snapshot
+  namespace: mapr-csi-dynamic-busybox
+snapshotter: com.mapr.csi-kdf
+parameters:
+    restServers: "172.16.4.233:8443"
+    cluster: "demo.mapr.com"
+    csiSnapshotterSecretName: "mapr-provisioner-secrets"
+    csiSnapshotterSecretNamespace: "mapr-csi-dynamic-busybox"
+
+---
+apiVersion: snapshot.storage.k8s.io/v1alpha1
+kind: VolumeSnapshot
+metadata:
+  name: mapr-csi-dynamic-busybox-snapshot
+  namespace: mapr-csi-dynamic-busybox
+spec:
+  snapshotClassName: mapr-csi-dynamic-busybox-snapshot
+  source:
+    name: mapr-csi-dynamic-busybox-pvc
+    kind: PersistentVolumeClaim
