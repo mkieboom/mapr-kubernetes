@@ -59,7 +59,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: mapr-csi-static-busybox-pvc
-  namespace: mapr-csi-static-busybox-pvc
+  namespace: mapr-csi-static-busybox
 spec:
   accessModes:
     - ReadWriteMany
