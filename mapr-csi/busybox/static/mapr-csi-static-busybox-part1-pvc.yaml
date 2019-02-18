@@ -67,28 +67,3 @@ spec:
     requests:
       storage: 300M
 
-# Pod
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: mapr-csi-static-busybox
-  namespace: mapr-csi-static-busybox
-spec:
-  containers:
-  - name: busybox
-    image: busybox
-    args:
-    - sleep
-    - "1000000"
-    resources:
-      requests:
-        memory: "2Gi"
-        cpu: "500m"
-    volumeMounts:
-    - mountPath: /mapr
-      name: maprcsi
-  volumes:
-    - name: maprcsi
-      persistentVolumeClaim:
-        claimName: mapr-csi-static-busybox-pvc
