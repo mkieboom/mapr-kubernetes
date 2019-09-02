@@ -1,0 +1,64 @@
+# MapR Kubernetes Container Storage Interface (CSI)
+
+# Using the Kubernetes CSI for dynamic provisioning
+
+# Provisioning: dynamic
+# Container:    busybox
+
+# Namespace
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mapr-csi-dynamic-busybox
+  labels:
+    name: mapr-csi-dynamic-busybox
+
+# Secret to authenticate with MapR Converged Data Platform
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mapr-provisioner-secrets
+  namespace: mapr-csi-dynamic-busybox
+type: Opaque
+data:
+# base64 encoding: "echo -n '<username/password>' | base64" eg:
+# echo -n 'mapr' | base64
+  MAPR_CLUSTER_USER: bWFwcg==
+  MAPR_CLUSTER_PASSWORD: bWFwcg==
+
+# StorageClass for MapR Converged Data Platform
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mapr-csi-dynamic-busybox-sc
+  namespace: mapr-csi-dynamic-busybox
+provisioner: com.mapr.csi-kdf
+parameters:
+    csiProvisionerSecretName: "mapr-provisioner-secrets"
+    csiProvisionerSecretNamespace: "mapr-csi-dynamic-busybox"
+    restServers: "192.168.168.15:8443"
+    cldbHosts: "192.168.168.15"
+    cluster: "demo.mapr.com"
+    securityType: "unsecure"
+    namePrefix: "busybox-csi"
+    mountPrefix: "/busybox-csi"
+    reclaimPolicy: "Retain"
+    advisoryquota: "100M"
+
+# PersistentVolumeClaim for MapR Converged Data Platform
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mapr-csi-dynamic-busybox-pvc
+  namespace: mapr-csi-dynamic-busybox
+spec:
+  storageClassName: mapr-csi-dynamic-busybox-sc
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 300M
